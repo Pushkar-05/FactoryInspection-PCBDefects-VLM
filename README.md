@@ -1,119 +1,107 @@
 # Edge VLM Industrial Inspector
 
-**Zero-shot defect detection using Vision-Language Models.**
+**Zero-shot defect detection with bounding boxes.**
 
-No labeling. No training. Point a camera and ask.
+No labeling. No training. Type what to find → Get visual detection.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-## The Problem
+## 🎬 Demo Video
 
-Traditional inspection requires training separate ML models for each defect type. When products change, you retrain.
+[![Edge VLM Inspector Demo](https://img.youtube.com/vi/FL0ycnFfG1s/0.jpg)](https://youtu.be/FL0ycnFfG1s)
 
-## The Solution
+**[▶️ Watch Demo on YouTube](https://youtu.be/FL0ycnFfG1s)**
 
-VLMs understand images + language. Instead of training, just ask:
+## Features
 
-```bash
-python src/inspector.py circuit.jpg --prompt "Is there a solder bridge?"
-```
-
-**Change the prompt, not the model.**
+- 🎯 **Bounding box detection** — Visual localization of defects
+- 🎥 **Live webcam** — Real-time inspection
+- ✏️ **Open vocabulary** — Detect ANY defect by typing
+- 🖥️ **Web GUI** — Easy-to-use interface
+- 📁 **Batch processing** — Inspect multiple images
 
 ## Quick Start
 
 ```bash
-# Clone
-git clone https://github.com/YOUR_USERNAME/edge-vlm-inspection.git
-cd edge-vlm-inspection
-
 # Install
-pip install -r requirements.txt
+pip install torch transformers pillow opencv-python gradio
 
-# Run
-python demo.py your_circuit.jpg
+# Run GUI
+python inspector_gui.py
+
+# Opens at http://localhost:7860
+```
+
+## Screenshot
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  🔍 Edge VLM Industrial Inspector                       │
+├─────────────────────────────────────────────────────────┤
+│  [📷 Image] [🎥 Live Video] [📁 Batch] [⚙️ Settings]    │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│   ┌──────────────┐    Defects to Detect:               │
+│   │   [IMAGE]    │    [solder bridge, scratch, crack]  │
+│   │  ┌────────┐  │                                     │
+│   │  │ defect │  │    Confidence: [====|====] 0.15     │
+│   │  └────────┘  │                                     │
+│   └──────────────┘    [🔍 Inspect]                     │
+│                                                         │
+│   Results:                                              │
+│   ⚠ 2 DEFECTS DETECTED                                 │
+│   1. solder bridge (87%)                               │
+│   2. scratch (72%)                                     │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ## Usage
 
+### GUI Mode (Recommended)
+```bash
+python inspector_gui.py
+
+# With public link (share with others)
+python inspector_gui.py --share
+```
+
+### Command Line
 ```bash
 # Single image
 python src/inspector.py image.jpg
 
-# Custom prompt
-python src/inspector.py image.jpg -p "Are there scratches or burns?"
+# Custom query
+python src/inspector.py image.jpg -p "Is there a crack?"
 
-# Batch inspection
+# Batch
 python src/inspector.py ./images/ -o results.json
-
-# Different inspection types
-python src/inspector.py image.jpg -t binary    # YES/NO answer
-python src/inspector.py image.jpg -t solder    # Solder joints
-python src/inspector.py image.jpg -t component # Component placement
 ```
 
-## Models
+## How It Works
 
-| Model | Size | RAM Needed | Quality |
-|-------|------|------------|---------|
-| `git-base` | 350MB | 4GB | Basic |
-| `blip-base` | 500MB | 6GB | Good ⭐ |
-| `blip-large` | 1GB | 8GB | Better |
-| `moondream` | 2GB | 12GB | Best |
+Uses **OWL-ViT** (Open-World Localization Vision Transformer):
+- Type any defect description
+- Model finds and localizes matching regions
+- Draws bounding boxes with confidence scores
 
-```bash
-# Use specific model
-python src/inspector.py image.jpg --model blip-large
-```
+**No training required** — Works out of the box for any defect type.
 
-## Python API
+## Preset Queries
 
-```python
-from src.inspector import EdgeVLMInspector
+| Category | Defects |
+|----------|---------|
+| PCB | solder bridge, missing component, burn mark, cold joint |
+| Metal | scratch, dent, rust, crack, corrosion |
+| Plastic | crack, discoloration, warping, flash |
+| Assembly | misalignment, missing screw, wrong orientation |
 
-inspector = EdgeVLMInspector(model_name="blip-base")
+## Requirements
 
-result = inspector.inspect(
-    image="pcb.jpg",
-    prompt="Check for solder bridges or missing components"
-)
-
-print(f"Defect: {result['has_defect']}")
-print(f"Analysis: {result['response']}")
-```
-
-## Output Format
-
-```json
-{
-    "image_source": "pcb.jpg",
-    "has_defect": true,
-    "response": "There appears to be a solder bridge between pins...",
-    "inference_time_ms": 1250,
-    "model": "blip-base"
-}
-```
-
-## Project Structure
-
-```
-edge-vlm-inspection/
-├── src/
-│   ├── inspector.py      # Core VLM engine
-│   └── __init__.py
-├── samples/              # Test images
-├── demo.py               # Quick test
-├── requirements.txt
-└── README.md
-```
-
-## Why This Matters
-
-$15B+ industrial vision market still runs on 2018 workflows:
-1. Collect images → 2. Label manually → 3. Train model → 4. Deploy → 5. Repeat
-
-VLMs collapse steps 1-4 into a single prompt.
+- Python 3.8+
+- 8GB+ RAM
+- GPU recommended (works on CPU too)
 
 ## Author
 
